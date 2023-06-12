@@ -1,0 +1,47 @@
+name: CD-Deploy
+on:
+  push:
+    branches:
+      - "develop"
+    paths:
+        - "infrastructure/**"
+        - ".github/workflows/**"
+
+env:
+  AWS_DEFAULT_REGION: "us-east-1"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    
+jobs: 
+  build-push-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+    # Define Infrastructure
+      - name: TF plan
+        id: plan
+        working-directory: "infrastructure"
+        run: |
+          terraform init -backend-config="key=mlops-grocery-sales-prod.tfstate" --reconfigure && terraform plan --var-file vars/prod.tfvars
+        
+      - name: TF Apply
+        id: tf-apply
+        working-directory: "infrastructure"
+        if: ${{ steps.tf-plan.outcome }} == "success"
+        run: |
+          terraform apply -auto-approve -var-file=vars/prod.tfvars
+          echo "name=rest_api_url::$(terraform output rest_api_url | xargs)" >> $GITHUB_OUTPUT
+          echo "name=ecr_repo::$(terraform output run_id | xargs)" >> $GITHUB_OUTPUT
+          echo "name=run_id::$(terraform output run_id | xargs)" >> $GITHUB_OUTPUT
+          echo "name=lambda_function::$(terraform output lambda_function | xargs)" >> $GITHUB_OUTPUT
