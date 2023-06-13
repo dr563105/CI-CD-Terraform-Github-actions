@@ -14,7 +14,7 @@ sudo apt update && sudo apt install terraform
 3. Initialise and apply configurations
 ```
 terraform init
-terraform apply -var-file vars/stg.tfvars # Should see plan to add 20 components. Give `yes` to continue
+terraform apply -var-file vars/stg.tfvars # Should see plan to add 21 components. Give `yes` to continue
 ```
 4. Testing. Copy the `rest_api_url` displayed, use a REST API client, select `POST` as method and in the `body` supply the following JSON
 ```
