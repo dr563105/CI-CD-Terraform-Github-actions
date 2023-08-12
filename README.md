@@ -29,9 +29,11 @@ Goto "settings` tab of the repo, under security menu goto `Secrets and variables
 ![Github setting page](assets/images/gh-secrets.png)
 
 In the `Name` field, enter `AWS_DEFAULT_REGION` and in `Secret` the region of your choice.
+
 ![](assets/images/gh-aws-region.png)
 
 Similarly add in `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. 
+
 ![](assets/images/gh-aws-secrets.png)
 
 ### ci-test.yml and cd-deploy.yml
